@@ -20,6 +20,7 @@
 // 追加のARCSライブラリをここに記述
 #include "ArcsMatrix.hh"
 #include "Limiter.hh"
+#include "ALOHA.hh"
 
 namespace ARCS {	// ARCS名前空間
 //! @brief インターフェースクラス
@@ -46,12 +47,14 @@ class InterfaceFunctions {
 
 		//! @brief サーボON信号を送出する関数
 		void ServoON(void){
+                      Aloha.SetTorque(true);
 			// ここにサーボアンプへのサーボON信号の送出シーケンスを記述する
 			
 		}
 
 		//! @brief サーボOFF信号を送出する関数
 		void ServoOFF(void){
+               Aloha.SetTorque(false);
 			// ここにサーボアンプへのサーボOFF信号の送出シーケンスを記述する
 			
 		}
@@ -65,8 +68,13 @@ class InterfaceFunctions {
 		//! @brief 位置ベクトルを取得する関数
 		//! @param[out]	Position	位置ベクトル [rad]
 		void GetPosition(ArcsMat<EquipParams::ACTUATOR_NUM, 1>& Position){
-			// ここにエンコーダとPositionベクトルとの関係を列記する
-			
+			std::array<double, EquipParams::ACTUATOR_NUM> AlohaPosition;
+
+                        Aloha.GetPosition(AlohaPosition);
+
+                       for(size_t i = 0; i < EquipParams::ACTUATOR_NUM; ++i){
+                       Position(i + 1, 1) = AlohaPosition[i];
+                }
 		}
 		
 		//! @brief 位置と速度ベクトルを取得する関数
@@ -108,9 +116,12 @@ class InterfaceFunctions {
 		//! @brief 電流ベクトルを取得する関数
 		//! @param[out]	Current	電流ベクトル [A]
 		void GetCurrent(ArcsMat<EquipParams::ACTUATOR_NUM, 1>& Current){
-			// ここに電流センサとCurrentベクトルとの関係を列記する
-			
-		}
+                std::array<double, EquipParams::ACTUATOR_NUM> AlohaCurrent;
+                Aloha.GetCurrent(AlohaCurrent);
+                for(size_t i = 0; i < EquipParams::ACTUATOR_NUM; ++i){
+                Current(i + 1, 1) = AlohaCurrent[i];
+                }
+                }
 		
 		//! @brief 電流指令ベクトルを設定する関数
 		//! @param[in]	CurrentRef	電流指令ベクトル [A]
@@ -148,6 +159,8 @@ class InterfaceFunctions {
 		}
 		
 	private:
+                ALOHA<EquipParams::ACTUATOR_NUM> Aloha;
+
 		InterfaceFunctions(const InterfaceFunctions&) = delete;					//!< コピーコンストラクタ使用禁止
 		const InterfaceFunctions& operator=(const InterfaceFunctions&) = delete;//!< 代入演算子使用禁止
 		

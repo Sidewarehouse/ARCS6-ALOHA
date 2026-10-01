@@ -40,7 +40,7 @@ class EquipParams {
 		};
 		
 		// 実験機アクチュエータの設定
-		static constexpr size_t ACTUATOR_NUM = 1;	//!< [基] 実験装置のアクチュエータの総数
+		static constexpr size_t ACTUATOR_NUM = 9;	//!< [基] 実験装置のアクチュエータの総数
 		
 		//! @brief 実験機アクチュエータの種類の設定（リニアモータか回転モータかの設定）
 		//! 下記が使用可能

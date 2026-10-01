@@ -26,6 +26,7 @@ using namespace ARCS;
 namespace {
 	// スレッド間で共有したい変数をここに記述
 	ArcsMat<EquipParams::ACTUATOR_NUM, 1> thm;	//!< [rad]  位置ベクトル
+        ArcsMat<EquipParams::ACTUATOR_NUM, 1> Current; //!<電流値
 	ArcsMat<EquipParams::ACTUATOR_NUM, 1> iqref;//!< [A,Nm] 電流指令,トルク指令ベクトル
 }
 
@@ -51,12 +52,25 @@ bool ControlFunctions::ControlFunction1(const double t, const double Tact, const
 		// 周期モード (ここは制御周期 SAMPLING_TIME[0] 毎に呼び出される(リアルタイム空間なので処理は制御周期内に収めること))
 		// リアルタイム制御ここから
 		Interface.GetPosition(thm);		// [rad] 位置ベクトルの取得
+                Interface.GetCurrent(Current);          //電流値の取得
 		Screen.GetOnlineSetVar();		// オンライン設定変数の読み込み
 		
 		// ここに制御アルゴリズムを記述する
 		
 		Interface.SetCurrent(iqref);	// [A] 電流指令ベクトルの出力
-		Screen.SetVarIndicator(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);	// 任意変数インジケータ(変数0, ..., 変数9)
+		// ARCS画面への9軸位置表示
+                Screen.SetVarIndicator(
+                Current(1, 1),
+                Current(2, 1),
+                Current(3, 1),
+                Current(4, 1),
+                Current(5, 1),
+                Current(6, 1),
+                Current(7, 1),
+                Current(8, 1),
+                Current(9, 1),
+                0
+                );// 任意変数インジケータ(変数0, ..., 変数9)
 		Graph.SetTime(Tact, t);									// [s] グラフ描画用の周期と時刻のセット
 		Graph.SetVars(0, 0, 0, 0, 0, 0, 0, 0, 0);	// グラフプロット0 (グラフ番号, 変数0, ..., 変数7)
 		Graph.SetVars(1, 0, 0, 0, 0, 0, 0, 0, 0);	// グラフプロット1 (グラフ番号, 変数0, ..., 変数7)
